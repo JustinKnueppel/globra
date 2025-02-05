@@ -1,5 +1,7 @@
+import glargs/args
 import gleam/io
 
 pub fn main() {
-  io.debug("Hello world")
+  io.debug(args.raw_args())
+  io.debug(args.raw_args() |> args.parsed())
 }
