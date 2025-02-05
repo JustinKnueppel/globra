@@ -10,14 +10,14 @@ pub fn main() {
 pub fn parse_test() {
   let cases = [
     #([], []),
-    #(["foo"], [args.Token("foo")]),
+    #(["foo"], [args.Command("foo")]),
     #(["--foo"], [args.Flag(args.B("foo"))]),
     #(["-foo"], [args.Flag(args.B("foo"))]),
     #(["--foo", "bar"], [args.Flag(args.KV("foo", "bar"))]),
     #(["-foo", "bar"], [args.Flag(args.KV("foo", "bar"))]),
     #(["--foo", "bar", "baz"], [
       args.Flag(args.KV("foo", "bar")),
-      args.Token("baz"),
+      args.Command("baz"),
     ]),
     #(["--foo", "--bar", "baz"], [
       args.Flag(args.B("foo")),
