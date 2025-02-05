@@ -16,6 +16,10 @@ pub type Argument {
   Flag(flag: Flag)
 }
 
+pub type PartitionedArguments {
+  PartitionedArguments(commands: List(String), flags: List(Flag))
+}
+
 type RawToken {
   RawFlag(name: String)
   RawValue(value: String)
@@ -30,6 +34,19 @@ pub fn raw_args() -> List(String) {
 pub fn parsed(args: List(String)) -> List(Argument) {
   parse_args(args, [])
   |> list.reverse()
+}
+
+/// Separate the arguments into commands and flags.
+pub fn partition(args: List(Argument)) -> PartitionedArguments {
+  let #(commands, flags) =
+    list.fold(args, #([], []), fn(acc, arg) {
+      let #(commands, flags) = acc
+      case arg {
+        Command(value) -> #([value, ..commands], flags)
+        Flag(flag) -> #(commands, [flag, ..flags])
+      }
+    })
+  PartitionedArguments(list.reverse(commands), list.reverse(flags))
 }
 
 fn parse_args(args: List(String), parsed: List(Argument)) -> List(Argument) {
