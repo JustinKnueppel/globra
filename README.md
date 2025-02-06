@@ -1,23 +1,23 @@
-# glargs
+# globra
 
-Glargs is a command line argument parser.
+globra is a command line argument parser.
 
-[![Package Version](https://img.shields.io/hexpm/v/glargs)](https://hex.pm/packages/glargs)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/glargs/)
+[![Package Version](https://img.shields.io/hexpm/v/globra)](https://hex.pm/packages/globra)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/globra/)
 
 ```sh
-gleam add glargs@1
+gleam add globra@1
 ```
 
 ```gleam
-import glargs
+import globra
 
 pub fn main() {
   // TODO: An example of the project in use
 }
 ```
 
-Further documentation can be found at <https://hexdocs.pm/glargs>.
+Further documentation can be found at <https://hexdocs.pm/globra>.
 
 ## Development
 

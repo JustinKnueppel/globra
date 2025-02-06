@@ -1,7 +1,7 @@
-import glargs/args
 import gleam/list
 import gleeunit
 import gleeunit/should
+import globra/args
 
 pub fn main() {
   gleeunit.main()

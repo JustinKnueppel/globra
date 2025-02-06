@@ -1,4 +1,4 @@
-import glargs/args
+import globra/args
 import gleam/io
 
 pub fn main() {
