@@ -2,12 +2,7 @@ import gleam/int
 import gleam/list
 import gleam/option
 import gleam/result
-
-/// Basic flags can either be key-value pairs or stand alone boolean toggles.
-pub type RawFlag {
-  B(name: String)
-  KV(name: String, value: String)
-}
+import globra/args.{B, Flag as RawFlag, KV}
 
 pub opaque type FlagOpts(a) {
   FlagOpts(name: String, aliases: List(String), default: option.Option(a))
