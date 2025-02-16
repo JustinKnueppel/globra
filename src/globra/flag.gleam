@@ -4,45 +4,70 @@ import gleam/option
 import gleam/result
 
 /// Basic flags can either be key-value pairs or stand alone boolean toggles.
-pub type FlagCore {
+pub type RawFlag {
   B(name: String)
   KV(name: String, value: String)
 }
 
+pub opaque type FlagOpts(a) {
+  FlagOpts(name: String, aliases: List(String), default: option.Option(a))
+}
+
 pub opaque type Flag(a) {
   Flag(
-    name: String,
-    aliases: List(String),
-    default: option.Option(a),
-    parser: fn(List(FlagCore), Flag(a)) -> Result(a, ParseError),
+    opts: FlagOpts(a),
+    parser: fn(List(RawFlag), FlagOpts(a)) -> Result(a, ParseError),
   )
 }
 
+fn named_flag(name: String) -> FlagOpts(a) {
+  FlagOpts(name: name, aliases: [], default: option.None)
+}
+
+/// Create a boolean flag with the given name.
 pub fn b(name: String) -> Flag(Bool) {
-  Flag(name: name, aliases: [], default: option.None, parser: b_parser)
+  Flag(opts: named_flag(name), parser: b_parser)
 }
 
+/// Create a boolean list flag with the given name.
 pub fn b_list(name: String) -> Flag(List(Bool)) {
-  Flag(name: name, aliases: [], default: option.None, parser: lb_parser)
+  Flag(opts: named_flag(name), parser: lb_parser)
 }
 
+/// Create an integer flag with the given name.
 pub fn i(name: String) -> Flag(Int) {
-  Flag(name: name, aliases: [], default: option.None, parser: i_parser)
+  Flag(opts: named_flag(name), parser: i_parser)
 }
 
+/// Create an integer list flag with the given name.
 pub fn i_list(name: String) -> Flag(List(Int)) {
-  Flag(name: name, aliases: [], default: option.None, parser: li_parser)
+  Flag(opts: named_flag(name), parser: li_parser)
 }
 
+/// Create a string flag with the given name.
 pub fn s(name: String) -> Flag(String) {
-  Flag(name: name, aliases: [], default: option.None, parser: s_parser)
+  Flag(opts: named_flag(name), parser: s_parser)
 }
 
+/// Create a string list flag with the given name.
 pub fn s_list(name: String) -> Flag(List(String)) {
-  Flag(name: name, aliases: [], default: option.None, parser: ls_parser)
+  Flag(opts: named_flag(name), parser: ls_parser)
 }
 
-fn by_name(flags: List(FlagCore), flag: Flag(a)) -> List(FlagCore) {
+/// Set the default value of the flag.
+pub fn with_default(flag: Flag(a), default: a) -> Flag(a) {
+  Flag(
+    opts: FlagOpts(..flag.opts, default: option.Some(default)),
+    parser: flag.parser,
+  )
+}
+
+/// Set the aliases for the flag.
+pub fn with_aliases(flag: Flag(a), aliases: List(String)) -> Flag(a) {
+  Flag(opts: FlagOpts(..flag.opts, aliases: aliases), parser: flag.parser)
+}
+
+fn by_name(flags: List(RawFlag), flag: FlagOpts(a)) -> List(RawFlag) {
   use f <- list.filter(flags)
   case f {
     B(name) -> list.contains([flag.name, ..flag.aliases], name)
@@ -56,7 +81,10 @@ type ParseError {
   ProvidedTooManyTimes
 }
 
-fn b_parser(flags: List(FlagCore), flag: Flag(Bool)) -> Result(Bool, ParseError) {
+fn b_parser(
+  flags: List(RawFlag),
+  flag: FlagOpts(Bool),
+) -> Result(Bool, ParseError) {
   let results = flags |> by_name(flag)
   case results {
     [] -> Ok(option.unwrap(flag.default, False))
@@ -69,8 +97,8 @@ fn b_parser(flags: List(FlagCore), flag: Flag(Bool)) -> Result(Bool, ParseError)
 }
 
 fn lb_parser(
-  flags: List(FlagCore),
-  flag: Flag(List(Bool)),
+  flags: List(RawFlag),
+  flag: FlagOpts(List(Bool)),
 ) -> Result(List(Bool), ParseError) {
   flags
   |> by_name(flag)
@@ -85,7 +113,10 @@ fn lb_parser(
   |> Ok
 }
 
-fn i_parser(flags: List(FlagCore), flag: Flag(Int)) -> Result(Int, ParseError) {
+fn i_parser(
+  flags: List(RawFlag),
+  flag: FlagOpts(Int),
+) -> Result(Int, ParseError) {
   let results = flags |> by_name(flag)
   case results {
     [] -> option.to_result(flag.default, RequiredNotFound)
@@ -96,8 +127,8 @@ fn i_parser(flags: List(FlagCore), flag: Flag(Int)) -> Result(Int, ParseError) {
 }
 
 fn li_parser(
-  flags: List(FlagCore),
-  flag: Flag(List(Int)),
+  flags: List(RawFlag),
+  flag: FlagOpts(List(Int)),
 ) -> Result(List(Int), ParseError) {
   flags
   |> by_name(flag)
@@ -111,8 +142,8 @@ fn li_parser(
 }
 
 fn s_parser(
-  flags: List(FlagCore),
-  flag: Flag(String),
+  flags: List(RawFlag),
+  flag: FlagOpts(String),
 ) -> Result(String, ParseError) {
   let results = flags |> by_name(flag)
   case results {
@@ -124,8 +155,8 @@ fn s_parser(
 }
 
 fn ls_parser(
-  flags: List(FlagCore),
-  flag: Flag(List(String)),
+  flags: List(RawFlag),
+  flag: FlagOpts(List(String)),
 ) -> Result(List(String), ParseError) {
   flags
   |> by_name(flag)
