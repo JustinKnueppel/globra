@@ -6,8 +6,8 @@ import gleam/option
 
 /// Flags can either be key-value pairs or stand alone boolean toggles.
 pub type Flag {
-  B(name: String)
-  KV(name: String, value: String)
+  B(name: FlagName)
+  KV(name: FlagName, value: String)
 }
 
 /// An argument is either a flag or a component of a command.
@@ -20,8 +20,13 @@ pub type PartitionedArguments {
   PartitionedArguments(commands: List(String), flags: List(Flag))
 }
 
+pub type FlagName {
+  Short(name: String)
+  Long(name: String)
+}
+
 type RawToken {
-  RawFlag(name: String)
+  RawFlag(name: FlagName)
   RawValue(value: String)
 }
 
@@ -83,8 +88,8 @@ fn parse_next(args: List(String)) -> #(option.Option(Argument), List(String)) {
 
 fn parse_token(token: String) -> RawToken {
   case token {
-    "--" <> fname -> RawFlag(fname)
-    "-" <> fname -> RawFlag(fname)
+    "--" <> fname -> RawFlag(Long(fname))
+    "-" <> fname -> RawFlag(Short(fname))
     value -> RawValue(value)
   }
 }
